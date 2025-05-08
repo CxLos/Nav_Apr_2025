@@ -6,6 +6,7 @@ import os
 import numpy as np 
 import pandas as pd 
 from datetime import datetime, timedelta
+from collections import Counter
 
 # import seaborn as sns 
 import plotly.graph_objects as go
@@ -161,12 +162,13 @@ df.rename(
     columns={
         "Activity Duration (minutes):" : "Activity Duration",
         "Total travel time (minutes):" : "Travel",
-        # "Person submitting this form:'," : "Person",
-        # "Location Encountered:" : "Location",
-        # "Individual's Insurance Status:" : "Insurance",
-        # "Type of support given:" : "Support",
-        # "Gender:" : "Gender",
-        # "Race/Ethnicity:" : "Ethniocity",
+        "Person submitting this form:" : "Person",
+        "Location Encountered:" : "Location",
+        "Individual's Insurance Status:" : "Insurance",
+        "Individual's Status:" : "Status",
+        "Type of support given:" : "Support",
+        "Gender:" : "Gender",
+        "Race/Ethnicity:" : "Ethnicity",
         # "" : "",
     }, 
 inplace=True)
@@ -197,9 +199,6 @@ df_duration = round(df_duration)
 # print('Travel time unique values:', df['Total travel time (minutes):'].unique())
 # print(df['Total travel time (minutes):'].value_counts())
 
-# Rename the column
-df.rename(columns={'Total travel time (minutes):': 'Travel'}, inplace=True)
-
 # Clean and replace invalid values
 df['Travel'] = (
     df['Travel']
@@ -223,14 +222,14 @@ travel_time = round(df['Travel'].sum() / 60)
 # ------------------------------- Gender Distribution ---------------------------- #
 
 # Groupby 'Gender:'
-df_gender = df['Gender:'].value_counts().reset_index(name='Count')
+df_gender = df['Gender'].value_counts().reset_index(name='Count')
 
 # Gender Bar Chart
 gender_bar=px.bar(
     df_gender,
-    x='Gender:',
+    x='Gender',
     y='Count',
-    color='Gender:',
+    color='Gender',
     text='Count',
 ).update_layout(
     height=700, 
@@ -265,7 +264,7 @@ gender_bar=px.bar(
         ),
     ),
     legend=dict(
-        title='Gender',
+        title='',
         orientation="v",  # Vertical legend
         x=1.05,  # Position legend to the right
         y=1,  # Position legend at the top
@@ -285,7 +284,7 @@ gender_bar=px.bar(
 # Gender Pie Chart
 gender_pie=px.pie(
     df,
-    names='Gender:'
+    names='Gender'
 ).update_layout(
     height=700,
     title='Patient Visits by Sex',
@@ -297,20 +296,21 @@ gender_pie=px.pie(
     )
 ).update_traces(
     textinfo='value+percent',
+    texttemplate='%{percent:.1%}',
     hovertemplate='<b>%{label} Visits</b>: %{value}<extra></extra>'
 )
 
 # ------------------------------- Race Graphs ---------------------------- #
 
 # # Groupby Race/Ethnicity:
-df_race = df['Race/Ethnicity:'].value_counts().reset_index(name='Count')
+df_race = df['Ethnicity'].value_counts().reset_index(name='Count')
 
 # Race Bar Chart
 race_bar=px.bar(
     df_race,
-    x='Race/Ethnicity:',
+    x='Ethnicity',
     y='Count',
-    color='Race/Ethnicity:',
+    color='Ethnicity',
     text='Count',
 ).update_layout(
     height=700, 
@@ -366,7 +366,7 @@ race_bar=px.bar(
 # Race Pie Chart
 race_pie=px.pie(
     df_race,
-    names='Race/Ethnicity:',
+    names='Ethnicity',
     values='Count'
 ).update_layout(
     height=700, 
@@ -379,6 +379,7 @@ race_pie=px.pie(
     )
 ).update_traces(
     textinfo='value+percent',
+        texttemplate='%{percent:.1%}',
     hovertemplate='<b>%{label}</b>: %{value}<extra></extra>'
 )
 
@@ -529,6 +530,7 @@ age_pie = px.pie(
     )
 ).update_traces(
     textinfo='value+percent',
+    texttemplate='%{percent:.1%}',
     hovertemplate='<b>%{label}</b>: %{value}<extra></extra>'
 )
 
@@ -548,8 +550,8 @@ insurance_unique = [
     'Medicaid'
 ]
 
-df["Individual's Insurance Status:"] = (
-    df["Individual's Insurance Status:"]
+df["Insurance"] = (
+    df["Insurance"]
     .str.strip()
     .replace(   
     {
@@ -557,15 +559,15 @@ df["Individual's Insurance Status:"] = (
     }
 ))
 
-df_insurance = df.groupby("Individual's Insurance Status:").size().reset_index(name='Count')
+df_insurance = df.groupby("Insurance").size().reset_index(name='Count')
 # # print(df["Individual's Insurance Status:"].value_counts())
 
 # Insurance Status Bar Chart
 insurance_bar=px.bar(
     df_insurance,
-    x="Individual's Insurance Status:",
+    x="Insurance",
     y='Count',
-    color="Individual's Insurance Status:",
+    color="Insurance",
     text='Count',
 ).update_layout(
     height=700, 
@@ -585,18 +587,20 @@ insurance_bar=px.bar(
         color='black'
     ),
     xaxis=dict(
-        tickangle=-20,  # Rotate x-axis labels for better readability
-        tickfont=dict(size=18),  # Adjust font size for the tick labels
+        tickangle=-20, 
+        tickfont=dict(size=18),  
+        showticklabels=False,  
+        # showticklabels=True,  
         title=dict(
             # text=None,
             text="Insurance",
-            font=dict(size=20),  # Font size for the title
+            font=dict(size=20),  
         ),
     ),
     yaxis=dict(
         title=dict(
             text='Count',
-            font=dict(size=20),  # Font size for the title
+            font=dict(size=20),  
         ),
     ),
     legend=dict(
@@ -606,7 +610,8 @@ insurance_bar=px.bar(
         y=1,  # Position legend at the top
         xanchor="left",  # Anchor legend to the left
         yanchor="top",  # Anchor legend to the top
-        visible=False
+        # visible=False,
+        visible=True,
     ),
     hovermode='closest', # Display only one hover label per trace
     bargap=0.08,  # Reduce the space between bars
@@ -619,7 +624,7 @@ insurance_bar=px.bar(
 # Insurance Status Pie Chart
 insurance_pie=px.pie(
     df_insurance,
-    names="Individual's Insurance Status:",
+    names="Insurance",
     values='Count'
 ).update_layout(
     height=700, 
@@ -631,68 +636,84 @@ insurance_pie=px.pie(
         color='black'
     )
 ).update_traces(
+    rotation=150,
     textinfo='value+percent',
+    texttemplate='%{percent:.2%}',
     hovertemplate='<b>%{label}</b>: %{value}<extra></extra>'
 )
 
 # ------------------------------ Location Encountered --------------------------------- #
 
 # Unique Values:
-# print("Locations Unique:", df['Location Encountered:'].unique().tolist())
+# print("Locations Unique Before \n:", df['Location'].unique().tolist())
 
-locations_unique = ['GudLife', 
-             "Black Men's Health Clinic", 
-             'Downtown Austin Community Court', 
-             'Cross Creek Hospital', 
-             'South Bridge', 
-             'phone ', 
-             'Home of resident',
-             'Community First Village', 
-             'Cross Creek hospital', 
-             'over phone', 
-             'phone', 
-             'phone call',
-             'over the phone',
-             'Hungry Hill/Austin Urban League', 
-             'Cross creek hospital', 
-             'Vivent Health', 'Clients home',
-             'Extended Stay America (Host Hotel) ', 
-             'Extended Stay America ', 
-             'The Bungalows', 
-             'Outreach in the field ', 
-             'Integral Care St. John Office ', 
-             'Extended Stay America Hotel ', 
-             'picked client up from encampment for SSA appointment']
+locations_unique = [
+"Black Men's Health Clinic", 'Transitions of Care', 'Terrezas public Library', 'Terreaz Public Library', 'Community First Village', 'Round Rock library', 'Phone call', 'Vivent Health', 'Pflugerville library /on the phone after leaving client', 'Pflugerville library/Phone call', 'Sunrise Navigation Homeless Center', 'capital villas apartments', 'phone call/Integral care St John location', 'Cross Creek Hospital', 'Austin Transitional Center', 'Austin transitional Center', 'Austin Transistional Center', 'Austin Transitional center', 'ATC', 'EXTENDED STAY AMERICA ', 'integral Care- St. John Location ', 'Extended Stay America', 'Phone appt ', 'Hybrid Meeting ', 'Bungalows', 'Deep in the trenches', 'South Bridge', 'GudLife', 'over the phone', 'Social Security Administration office', 'over phone', 'out in field', 'Housing Authority of Travis County', 'ICare and social security office', 'Social Security office', 'Social Security Office', 'met client at southbridge to complete check in and discussed what options we had for us to be able to obtain missing vital docs', 'picking client up from encampment, vital statics appointment and walk in at social security office, then returning client back to encampment area '
+]
 
-df['Location Encountered:'] = (
-    df['Location Encountered:']
+location_categories = [
+    "Austin Transitional Center",
+    "Black Men's Health Clinic",
+    "Bungalows",
+    "Community First Village",
+    "Cross Creek Hospital",
+    "Downtown Austin Community Court",
+    "Event",
+    "Extended Stay America",
+    "GudLife",
+    "Housing Authority of Travis County",
+    "Integral Care - St. John",
+    "Kensington",
+    "Phone call",
+    "South Bridge",
+    "Sunrise Navigation Homeless Center",
+    "Terrazas Public Library"
+]
+
+
+df['Location'] = (
+    df['Location']
     .str.strip()
-    .replace(
-        {
-        'Southbridge': 'SouthBridge',
-        'DACC': 'Downtown Austin Community Court',
-        'SNHC': 'Sunrise Navigation Homeless Center',
-        'HATC': 'Housing Authority of Travis County',
-        'CFV': 'Community First Village',
-        'BMHC': "Black Men's Health Clinic",
-        "The Bumgalows" : "The Bungalows",
-        "PHONE CONTACT" : "Phone Call",
-        "PHONE" : "Phone Call",
-        "phone call" : "Phone Call",
-        "phone" : "Phone Call",
-        "over phone" : "Phone Call",
+    .replace({
+        # Terrazas Public Library
+        "Terrezas public Library" : "Terrazas Public Library",
+        "Terreaz Public Library" : "Terrazas Public Library",
+        
+        # Phone
+        "Phone call" : "Phone Call",
+        "Phone appt" : "Phone Call",
         "over the phone" : "Phone Call",
-        "Cross Creek hospital" : "Cross Creek Hospital",
-        "Cross creek hospital" : "Cross Creek Hospital",
-        "Extended Stay America (Host Hotel)" : "Extended Stay America",
-        "Extended Stay America Hotel" : "Extended Stay America",
-        "last known area was St. John. Connected with Hungry Hill to help me search for client" : "Client Missing",
-        }
-    )
+        "over phone" : "Phone Call",
+        
+        # Integral Care
+        "phone call/Integral care St John location" : "Integral Care - St. John",
+        "integral Care- St. John Location" : "Integral Care - St. John",
+        
+        # Austin Transitional Center
+        "Austin transitional Center" : "",
+        "Austin Transistional Center" : "",
+        "Austin Transitional center" : "",
+        "ATC" : "",
+        
+        # 
+        "EXTENDED STAY AMERICA " : "",
+        
+        # Social Security Office
+        'ICare and social security office' : "Social Security Office",
+        'Social Security office' : "Social Security Office",
+        
+        # South Bridge
+        "met client at southbridge to complete check in and discussed what options we had for us to be able to obtain missing vital docs" : "South Bridge",
+        
+        # Encampment Area
+        "picking client up from encampment, vital statics appointment and walk in at social security office, then returning client back to encampment area" : "Encampment Area",
+    })
 )
 
+location_unexpected = df[~df['Location'].isin(location_categories)]
+# print("Admin Unexpected: \n", admin_unexpected['Admin Activity'].unique().tolist())
 
-df_location = df['Location Encountered:'].value_counts().reset_index(name='Count')
+df_location = df['Location'].value_counts().reset_index(name='Count')
 # # print(df['Location Encountered:'].value_counts())
 
 # unique values
@@ -701,9 +722,9 @@ df_location = df['Location Encountered:'].value_counts().reset_index(name='Count
 # Location Bar Chart
 location_bar=px.bar(
     df_location,
-    x="Location Encountered:",
+    x="Location",
     y='Count',
-    color="Location Encountered:",
+    color="Location",
     text='Count',
 ).update_layout(
     height=900, 
@@ -760,7 +781,7 @@ location_bar=px.bar(
 # Location Pie Chart
 location_pie=px.pie(
     df_location,
-    names="Location Encountered:",
+    names="Location",
     values='Count'
 ).update_layout(
     height=900,
@@ -773,21 +794,62 @@ location_pie=px.pie(
         color='black'
     )
 ).update_traces(
-    rotation=50,
-    textinfo='value+percent',
+    rotation=25,
+    textinfo='percent',
+    texttemplate='%{percent:.2%}',
     hovertemplate='<b>%{label}</b>: %{value}<extra></extra>'
 )
 
 # ------------------------------- Type of Support Given ---------------------------- #
 
+# print("Support Unique Before: \n", df["Support"].unique().tolist())
+# print("Support Value counts: \n", df["Support"].value_counts())
+
+support_unique = [
+    'Specialty Care Referral', 'Behavioral Health Referral', 'Social Determinant of Health Referral, Re-Entry', 'Social Determinant of Health Referral', 'MAP Application', 'Primary Care Appointment', 'Permanent Support Housing', 'Syayus of map application and scheduling appointment ', 'Permanent Support Housing, Primary Care Appointment, homeless resources', 'Behavioral Health Appointment, Permanent Support Housing, Primary Care Appointment, Social Determinant of Health Referral', 'Primary Care Appointment, Specialty Care Referral', 'Behavioral Health Appointment, Primary Care Appointment, Specialty Care Referral', 'Behavioral Health Referral, MAP Application, Permanent Support Housing, Primary Care Appointment, Primary Care Referral, Specialty Care Referral, Social Determinant of Health Referral, coordinated assessment with Sunrise', 'primary care appointment', 'Behavioral Health Appointment, Behavioral Health Referral, MAP Application, Permanent Support Housing, Primary Care Appointment', 'Behavioral Health Appointment, Behavioral Health Referral, MAP Application, Permanent Support Housing', 'MAP Application, Primary Care Appointment', 'Primary Care Appointment, Food bank', 'Behavioral Health Appointment, MAP Application, Primary Care Appointment, Specialty Care Referral', 'Behavioral Health Appointment', 'Primary Care Referral', 'MAP Application, set an appointment for Financial Screening', 'Outreach search last known place ', 'Permanent Support Housing, I have hard copies of votal docs. Searching for client thru outreach ', 'Permanent Support Housing, Client Search and Outreach ', 'Permanent Support Housing, Searching for clients assigned ', 'Behavioral Health Referral, Permanent Support Housing, Primary Care Referral', 'Specialty Care Referral, Permanent Support Housing', 'MAP Application, '
+]
+
+support_categories =[
+    "Behavioral Health Appointment",
+    "Behavioral Health Referral",
+    "MAP Application",
+    "Permanent Support Housing",
+    "Primary Care Appointment",
+    "Primary Care Referral"
+    "Specialty Care Referral"
+    "Social Determinant of Health Referral"
+]
+
+# Normalize support_categories (lowercase and stripped for consistency)
+# The code is creating a dictionary `normalized_categories` where the keys are the lowercase versions of the categories in the `support_categories` list, stripped of any leading or trailing whitespace, and the values are the original categories. This allows for easy lookup of categories in a case-insensitive manner.
+normalized_categories = {cat.lower().strip(): cat for cat in support_categories}
+
+# Counter to count matches
+counter = Counter()
+
+for entry in df['Support']:
+    
+    # Split and clean each category
+    items = [i.strip().lower() for i in entry.split(",")]
+    for item in items:
+        if item in normalized_categories:
+            counter[normalized_categories[item]] += 1
+
+# Display the result
+# for category, count in counter.items():
+#     print(f"Support Counts: \n {category}: {count}")
+
 # # 'How can BMHC support you today?'
-df_support = df['Type of support given:'].value_counts().reset_index(name='Count')
+# df_support = df['Support'].value_counts().reset_index(name='Count')
+
+df_support = pd.DataFrame(counter.items(), columns=['Support', 'Count']).sort_values(by='Count', ascending=False)
+
 
 support_bar=px.bar(
     df_support,
-    x='Type of support given:',
+    x='Support',
     y='Count',
-    color='Type of support given:',
+    color='Support',
     text='Count',
 ).update_layout(
     height=700, 
@@ -843,7 +905,7 @@ support_bar=px.bar(
 # Support Pie Chart
 support_pie = px.pie(
     df_support,
-    names='Type of support given:',
+    names='Support',
     values='Count',
 ).update_layout(
     title='Support Distribution Pie Chart',
@@ -857,20 +919,21 @@ support_pie = px.pie(
 ).update_traces(
     rotation=110,
     textinfo='value+percent',
+    texttemplate='%{percent:.2%}',
     hovertemplate='<b>%{label}</b>: %{value}<extra></extra>'
 )
 
 # ------------------------ Individuals' Status (New vs. Returning) --------------------- #
 
 # # "Individual's Status:" dataframe:
-df_status = df['Individual\'s Status:'].value_counts().reset_index(name='Count')
+df_status = df['Status'].value_counts().reset_index(name='Count')
 
 # Status Bar Chart
 status_bar=px.bar(
     df_status,
-    x='Individual\'s Status:',
+    x='Status',
     y='Count',
-    color='Individual\'s Status:',
+    color='Status',
     text='Count',
 ).update_layout(
     height=700, 
@@ -927,7 +990,7 @@ status_bar=px.bar(
 # Status Pie Chart
 status_pie=px.pie(
     df_status,
-    names="Individual\'s Status:",
+    names="Status",
     values='Count'  # Specify the values parameter
 ).update_layout(
     height=700, 
@@ -941,6 +1004,7 @@ status_pie=px.pie(
 ).update_traces(
     rotation=-90,
     textinfo='value+percent',
+    texttemplate='%{percent:.2%}',
     hovertemplate='<b>%{label} Status</b>: %{value}<extra></extra>',
 )
 
@@ -965,8 +1029,8 @@ person_unique = [
     'Kimberly Holiday'
 ]
 
-df['Person submitting this form:'] = (
-    df['Person submitting this form:']
+df['Person'] = (
+    df['Person']
     .str.strip()
     .replace({
         'Dominique': 'Dominique Street',
@@ -979,15 +1043,15 @@ df['Person submitting this form:'] = (
     )
 
 # # Groupby Person submitting this form:
-df_person = df['Person submitting this form:'].value_counts().reset_index(name='Count')
+df_person = df['Person'].value_counts().reset_index(name='Count')
 # print('Person Submitting: \n', person_submitting)
 
 # Person Submitting Bar Chart
 person_bar=px.bar(
     df_person,
-    x='Person submitting this form:',
+    x='Person',
     y='Count',
-    color='Person submitting this form:',
+    color='Person',
     text='Count',
 ).update_layout(
     height=700, 
@@ -1044,7 +1108,7 @@ person_bar=px.bar(
 # Person Submitting Pie Chart
 person_pie=px.pie(
     df_person,
-    names="Person submitting this form:",
+    names="Person",
     values='Count'  # Specify the values parameter
 ).update_layout(
     height=700, 
@@ -1058,16 +1122,19 @@ person_pie=px.pie(
 ).update_traces(
     rotation=140,
     textinfo='value+percent',
+    texttemplate='%{percent:.1%}',
     hovertemplate='<b>%{label} Status</b>: %{value}<extra></extra>',
 )
 
 # ---------------------- Zip 2 --------------------- #
 
-zip_unique =['', 78741, 78723, 78744, 78724, 78754, 78753, 78758, 78660, 78752, 'Unknown ', 78745, 78617, 78702, 78664, 78613, 78653, 78721, 'Unknown', 78704, 78748, 78717, 78640, 'NA', 78757, 78727, 78749, 76537, 78729, 78725, 78759, 78750, 78621, 78728, 78731, 78683]
-
-
-        
 df['ZIP2'] = df['ZIP Code:']
+# print('ZIP2 Unique Before: \n', df['ZIP2'].unique().tolist())
+
+zip2_unique =[
+78753, '', 78721, 78664, 78725, 78758, 78724, 78660, 78723, 78748, 78744, 78752, 78745, 78617, 78754, 78653, 78727, 78747, 78659, 78759, 78741, 78616, 78644, 78757, 'UnKnown', 'Unknown', 'uknown', 'Unknown ', 78729
+]
+        
 zip2_mode = df['ZIP2'].mode()[0]
 
 df['ZIP2'] = (
@@ -1078,8 +1145,10 @@ df['ZIP2'] = (
         'Texas': zip2_mode,
         'Unhoused': zip2_mode,
         'UNHOUSED': zip2_mode,
+        'UnKnown': zip2_mode,
         'Unknown': zip2_mode,
-        'Unknown ': zip2_mode,
+        'uknown': zip2_mode,
+        'Unknown': zip2_mode,
         'NA': zip2_mode,
         'nan': zip2_mode,
         '': zip2_mode,
@@ -1089,7 +1158,7 @@ df['ZIP2'] = (
 df['ZIP2'] = df['ZIP2'].fillna(zip2_mode)
 df_z = df['ZIP2'].value_counts().reset_index(name='Count')
 
-# print('ZIP2 Unique:', df_z['ZIP2'].unique().tolist())
+print('ZIP2 Unique After: \n', df_z['ZIP2'].unique().tolist())
 
 zip_fig =px.bar(
     df_z,
@@ -1138,7 +1207,7 @@ zip_fig =px.bar(
 
 # =============================== Folium ========================== #
 
-# empty_strings = df[df['ZIP Code:'].str.strip() == ""]
+empty_strings = df[df['ZIP Code:'].str.strip() == ""]
 # print("Empty strings: \n", empty_strings.iloc[:, 10:12])
 
 # Filter df to exclued all rows where there is no value for "ZIP Code:"
@@ -1148,22 +1217,27 @@ mode_value = df['ZIP Code:'].mode()[0]
 df['ZIP Code:'] = df['ZIP Code:'].fillna(mode_value)
 
 # print("ZIP value counts:", df['ZIP Code:'].value_counts())
-# print("Zip Unique Before:", df['ZIP Code:'].unique().tolist())
+# print("Zip Unique Before: \n", df['ZIP Code:'].unique().tolist())
 
 # Check for non-numeric values in the 'ZIP Code:' column
 # print("ZIP non-numeric values:", df[~df['ZIP Code:'].str.isnumeric()]['ZIP Code:'].unique())
 
 df['ZIP Code:'] = df['ZIP Code:'].astype(str).str.strip()
 
-df['ZIP Code:'] = df['ZIP Code:'].replace({
-    'Texas': mode_value,
-    'Unhoused': mode_value,
-    'Unknown': mode_value,
-    'Unknown ': mode_value,
-    'NA': mode_value,
-    "": mode_value,
-    'nan': mode_value  # Replace 'nan' strings
-})
+df['ZIP Code:'] = (
+    df['ZIP Code:']
+    .astype(str).str.strip()
+        .replace({
+            'Texas': mode_value,
+            'Unhoused': mode_value,
+            'unknown': mode_value,
+            'Unknown': mode_value,
+            'UnKnown': mode_value,
+            'uknown': mode_value,
+            'NA': mode_value,
+            "": mode_value,
+            'nan': mode_value
+}))
 
 df['ZIP Code:'] = df['ZIP Code:'].where(df['ZIP Code:'].str.isdigit(), mode_value)
 df['ZIP Code:'] = df['ZIP Code:'].astype(int)
@@ -1173,7 +1247,7 @@ df_zip = df['ZIP Code:'].value_counts().reset_index(name='Residents')
 df_zip['Residents'] = df_zip['Residents'].astype(int)
 # df_zip.drop('index', axis=1, inplace=True)
 
-# print("Zip Unique After:", df['ZIP Code:'].unique().tolist())
+# print("Zip Unique After: \n", df['ZIP Code:'].unique().tolist())
 
 # print(df_zip.head())
 

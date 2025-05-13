@@ -295,8 +295,8 @@ gender_pie=px.pie(
         color='black'
     )
 ).update_traces(
-    textinfo='value+percent',
-    texttemplate='%{percent:.1%}',
+    # textinfo='value+percent',
+    texttemplate='%{value} (%{percent:.2%})',
     hovertemplate='<b>%{label} Visits</b>: %{value}<extra></extra>'
 )
 
@@ -378,8 +378,8 @@ race_pie=px.pie(
         color='black'
     )
 ).update_traces(
-    textinfo='value+percent',
-        texttemplate='%{percent:.1%}',
+    # textinfo='value+percent',
+    texttemplate='%{value} (%{percent:.2%})',
     hovertemplate='<b>%{label}</b>: %{value}<extra></extra>'
 )
 
@@ -529,8 +529,8 @@ age_pie = px.pie(
         color='black'
     )
 ).update_traces(
-    textinfo='value+percent',
-    texttemplate='%{percent:.1%}',
+    # textinfo='value+percent',
+    texttemplate='%{value} (%{percent:.2%})',
     hovertemplate='<b>%{label}</b>: %{value}<extra></extra>'
 )
 
@@ -637,8 +637,8 @@ insurance_pie=px.pie(
     )
 ).update_traces(
     rotation=150,
-    textinfo='value+percent',
-    texttemplate='%{percent:.2%}',
+    # textinfo='value+percent',
+    texttemplate='%{value} (%{percent:.2%})',
     hovertemplate='<b>%{label}</b>: %{value}<extra></extra>'
 )
 
@@ -675,6 +675,9 @@ df['Location'] = (
     df['Location']
     .str.strip()
     .replace({
+        "" : "No Location",
+        "out in field" : "Out in Field",
+        
         # Terrazas Public Library
         "Terrezas public Library" : "Terrazas Public Library",
         "Terreaz Public Library" : "Terrazas Public Library",
@@ -690,13 +693,14 @@ df['Location'] = (
         "integral Care- St. John Location" : "Integral Care - St. John",
         
         # Austin Transitional Center
-        "Austin transitional Center" : "",
-        "Austin Transistional Center" : "",
-        "Austin Transitional center" : "",
-        "ATC" : "",
+        "Austin transitional Center" : "Austin Transitional Center",
+        "Austin Transistional Center" : "Austin Transitional Center",
+        "Austin Transitional center" : "Austin Transitional Center",
+        "ATC" : "Austin transitional Center",
         
         # 
-        "EXTENDED STAY AMERICA " : "",
+        "EXTENDED STAY AMERICA" : "Extended Stay America",
+        "capital villas apartments" : "Capital Villas Apartments",
         
         # Social Security Office
         'ICare and social security office' : "Social Security Office",
@@ -711,7 +715,7 @@ df['Location'] = (
 )
 
 location_unexpected = df[~df['Location'].isin(location_categories)]
-# print("Admin Unexpected: \n", admin_unexpected['Admin Activity'].unique().tolist())
+# print("Location Unexpected: \n", location_unexpected['Location'].unique().tolist())
 
 df_location = df['Location'].value_counts().reset_index(name='Count')
 # # print(df['Location Encountered:'].value_counts())
@@ -795,8 +799,8 @@ location_pie=px.pie(
     )
 ).update_traces(
     rotation=25,
-    textinfo='percent',
-    texttemplate='%{percent:.2%}',
+    # textinfo='percent',
+    texttemplate='%{value} (%{percent:.2%})',
     hovertemplate='<b>%{label}</b>: %{value}<extra></extra>'
 )
 
@@ -843,7 +847,6 @@ for entry in df['Support']:
 # df_support = df['Support'].value_counts().reset_index(name='Count')
 
 df_support = pd.DataFrame(counter.items(), columns=['Support', 'Count']).sort_values(by='Count', ascending=False)
-
 
 support_bar=px.bar(
     df_support,
@@ -918,8 +921,8 @@ support_pie = px.pie(
     )
 ).update_traces(
     rotation=110,
-    textinfo='value+percent',
-    texttemplate='%{percent:.2%}',
+    # textinfo='value+percent',
+    texttemplate='%{value} (%{percent:.2%})',
     hovertemplate='<b>%{label}</b>: %{value}<extra></extra>'
 )
 
@@ -1003,8 +1006,8 @@ status_pie=px.pie(
     )
 ).update_traces(
     rotation=-90,
-    textinfo='value+percent',
-    texttemplate='%{percent:.2%}',
+    # textinfo='value+percent',
+    texttemplate='%{value} (%{percent:.2%})',
     hovertemplate='<b>%{label} Status</b>: %{value}<extra></extra>',
 )
 
@@ -1121,8 +1124,8 @@ person_pie=px.pie(
     )
 ).update_traces(
     rotation=140,
-    textinfo='value+percent',
-    texttemplate='%{percent:.1%}',
+    # textinfo='value+percent',
+    texttemplate='%{value} (%{percent:.2%})',
     hovertemplate='<b>%{label} Status</b>: %{value}<extra></extra>',
 )
 
@@ -1158,7 +1161,7 @@ df['ZIP2'] = (
 df['ZIP2'] = df['ZIP2'].fillna(zip2_mode)
 df_z = df['ZIP2'].value_counts().reset_index(name='Count')
 
-print('ZIP2 Unique After: \n', df_z['ZIP2'].unique().tolist())
+# print('ZIP2 Unique After: \n', df_z['ZIP2'].unique().tolist())
 
 zip_fig =px.bar(
     df_z,

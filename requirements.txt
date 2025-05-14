@@ -75,5 +75,6 @@ urllib3==2.3.0
 wcwidth==0.2.13
 Werkzeug==3.0.6
 wheel==0.45.1
+XlsxWriter>=3.0.0
 xyzservices==2025.1.0
 zipp==3.21.0

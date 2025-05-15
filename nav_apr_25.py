@@ -75,7 +75,9 @@ df = df[df['Date of Activity'].dt.month == 4]
 current_month = datetime(2025, 4, 1).strftime("%B")
 report_year = datetime(2025, 4, 1).year
 
+# Strip whitespace
 df.columns = df.columns.str.strip()
+df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
 
 # Define a discrete color sequence
 # color_sequence = px.colors.qualitative.Plotly
@@ -122,37 +124,7 @@ columns = [
     'Column 21', 
   ]
 
-# =============================== Missing Values ============================= #
-
-# missing = df.isnull().sum()
-# print('Columns with missing values before fillna: \n', missing[missing > 0])
-
-#  HMIS SPID Number:               14
-# MAP Card Number                 14
-# Total travel time (minutes):    14
-
-# =============================== Missing Values ============================= #
-
-# missing = df_q1.isnull().sum()
-# print('Columns with missing values before fillna: \n', missing[missing > 
-
 # ============================== Data Preprocessing ========================== #
-
-# Check for duplicate columns
-# duplicate_columns = df.columns[df.columns.duplicated()].tolist()
-# print(f"Duplicate columns found: {duplicate_columns}")
-# if duplicate_columns:
-#     print(f"Duplicate columns found: {duplicate_columns}")
-
-# Fill Missing Values for df
-columns_to_fill = [
-    "Total travel time (minutes):",
-]
-
-# Fill missing values for categorical columns with 'Unknown'
-for column in columns_to_fill:
-    if column in df.columns:
-        df[column] = df[column].fillna('Unknown')
 
 # # Fill missing values for numerical columns with a specific value (e.g., -1)
 df['HMIS SPID Number:'] = df['HMIS SPID Number:'].fillna(-1)
@@ -221,8 +193,32 @@ travel_time = round(df['Travel'].sum() / 60)
 
 # ------------------------------- Gender Distribution ---------------------------- #
 
+print("Gender Unique Before:", df['Gender'].unique().tolist())
+
+gender_unique =[
+    'Male', 
+    'Transgender', 
+    'Female', 
+    'Group search ', 
+    'Prefer Not to Say'
+]
+
+# print("Gender Value Counts Before: \n", df_gender)
+
+df['Gender'] = (
+    df['Gender']
+        .astype(str)
+            .str.strip()
+            .replace({
+                "Group search": "N/A", 
+            })
+)
+
 # Groupby 'Gender:'
 df_gender = df['Gender'].value_counts().reset_index(name='Count')
+
+print("Gender Unique After:", df['Gender'].unique().tolist())
+# print("Gender Value Counts After: \n", df_gender)
 
 # Gender Bar Chart
 gender_bar=px.bar(
@@ -296,7 +292,7 @@ gender_pie=px.pie(
     )
 ).update_traces(
     # textinfo='value+percent',
-    texttemplate='%{value} (%{percent:.2%})',
+    texttemplate='%{value}<br>(%{percent:.2%})',
     hovertemplate='<b>%{label} Visits</b>: %{value}<extra></extra>'
 )
 

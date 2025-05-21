@@ -309,7 +309,7 @@
 .high2 {
   font-size: 70px;
   margin: 0px 0px 0px 0px;
-  padding: 25px 13px 25px 13px;
+  padding: 35px 5px 35px 5px;
   display: flex; /* Use flexbox for alignment */
   justify-content: center; /* Horizontal centering */
   align-items: center; /* Vertical centering */
@@ -328,7 +328,7 @@
 .high4 {
   font-size: 70px;
   margin: 0px 0px 0px 0px;
-  padding: 25px 12px 25px 12px;
+  padding: 35px 5px 35px 5px;
   display: flex; /* Use flexbox for alignment */
   justify-content: center; /* Horizontal centering */
   align-items: center; /* Vertical centering */
@@ -340,7 +340,7 @@
 .high5 {
   font-size: 70px;
   margin: 0px 0px 0px 0px;
-  padding: 10px 15px 10px 15px;
+  padding: 20px 10px 20px 10px;
   display: flex; /* Use flexbox for alignment */
   justify-content: center; /* Horizontal centering */
   align-items: center; /* Vertical centering */

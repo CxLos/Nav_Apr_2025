@@ -77,7 +77,7 @@ report_year = datetime(2025, 4, 1).year
 
 # Strip whitespace
 df.columns = df.columns.str.strip()
-df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
 
 # Define a discrete color sequence
 # color_sequence = px.colors.qualitative.Plotly
@@ -193,7 +193,7 @@ travel_time = round(df['Travel'].sum() / 60)
 
 # ------------------------------- Gender Distribution ---------------------------- #
 
-print("Gender Unique Before:", df['Gender'].unique().tolist())
+# print("Gender Unique Before:", df['Gender'].unique().tolist())
 
 gender_unique =[
     'Male', 
@@ -217,7 +217,7 @@ df['Gender'] = (
 # Groupby 'Gender:'
 df_gender = df['Gender'].value_counts().reset_index(name='Count')
 
-print("Gender Unique After:", df['Gender'].unique().tolist())
+# print("Gender Unique After:", df['Gender'].unique().tolist())
 # print("Gender Value Counts After: \n", df_gender)
 
 # Gender Bar Chart
@@ -386,13 +386,6 @@ def random_date(start, end):
     return start + timedelta(days=np.random.randint(0, (end - start).days))
 
 start_date = datetime(1950, 1, 1) # Example: start date, e.g., 1950-01-01
-end_date = datetime(2000, 12, 31)
-
-def random_date(start, end):
-    return start + timedelta(days=np.random.randint(0, (end - start).days))
-
-# # Define the date range for random dates
-start_date = datetime(1950, 1, 1)
 end_date = datetime(2000, 12, 31)
 
 # # Convert 'Individual's Date of Birth:' to datetime, coercing errors to NaT
